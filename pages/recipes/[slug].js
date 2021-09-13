@@ -41,6 +41,7 @@ export async function getStaticProps(context) {
   return {
     props: {
       recipe: items[0], // pass the first and only item in the response array matching the slug
+      revalidate: 10, // how often at most check for context update to regenerate the page (in seconds)
     },
   }
 }
