@@ -1,6 +1,8 @@
 import { createClient } from 'contentful'
 import Image from 'next/image'
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer'
+import { useRouter } from 'next/router'
+import Skeleton from '../../components/Skeleton';
 
 const client = createClient({
   space: process.env.CONTENTFUL_SPACE_ID,
@@ -19,9 +21,9 @@ export async function getStaticPaths() {
   }));
 
   // We'll pre-render only these paths at build time.
-  // { fallback: blocking } will server-render pages
-  // on-demand if the path doesn't exist.
-  return { paths, fallback: 'blocking' }
+  // { fallback: true } will server-render pages
+  // on-demand if the path doesn't exist and show a fallback page meanwhile
+  return { paths, fallback: true }
 }
 
 // This function gets called at build time on server-side.
@@ -41,12 +43,19 @@ export async function getStaticProps(context) {
   return {
     props: {
       recipe: items[0], // pass the first and only item in the response array matching the slug
-      revalidate: 10, // how often at most check for context update to regenerate the page (in seconds)
     },
+    revalidate: 1, // how often at most check for context update to regenerate the page (in seconds)
   }
 }
 
 export default function RecipeDetails({ recipe }) {
+  const router = useRouter();
+  // If the page is not yet generated, this will be displayed
+  // initially until getStaticProps() finishes running
+  if (router.isFallback) {
+    return <Skeleton />
+  }
+
   const { featuredImage, title, cookingTime, ingredients, method } = recipe.fields;
 
   return (
