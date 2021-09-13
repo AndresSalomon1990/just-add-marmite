@@ -38,6 +38,16 @@ export async function getStaticProps(context) {
   // returns an array
   const { items } = await client.getEntries({ content_type: 'recipe', 'fields.slug': slug });
 
+  // redirect to the homepage if the item doesn't exist
+  if (!items.length) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
+    }
+  }
+
   // By returning { props: { posts } }, the Blog component
   // will receive `posts` as a prop at build time
   return {
